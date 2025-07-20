@@ -56,13 +56,6 @@ async function listarEventosPorOrganizador(req: Request, res: Response) {
     console.log("Entrei na listar eventos por organizador");
     const usuario = getLoggedUser(req);
 
-    if (usuario.tipo !== "ORGANIZADOR") {
-      return res.status(403).json({
-        sucesso: false,
-        mensagem: "Apenas organizadores podem listar seus eventos.",
-      });
-    }
-
     const eventos = await EventosRepository.listarEventosPorOrganizador(
       usuario.id
     );
@@ -85,13 +78,6 @@ async function listarEventosPorOrganizador(req: Request, res: Response) {
 async function inscreverNoEvento(req: Request, res: Response) {
   try {
     const usuario = getLoggedUser(req);
-
-    if (usuario.tipo !== "ESTUDANTE") {
-      return res.status(403).json({
-        sucesso: false,
-        mensagem: "Apenas estudantes podem se inscrever.",
-      });
-    }
 
     const { eventoId } = req.body;
 

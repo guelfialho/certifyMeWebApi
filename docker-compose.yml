@@ -3,7 +3,7 @@ version: "3.1"
 services:
   db:
     image: postgres:14.2-alpine
-    container_name: certifyme_postgres
+    container_name: certifyMeWeb
     restart: always
     environment:
       POSTGRES_DB: certifymeweb

@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 interface UsuarioLogado {
   id: string;
   nome: string;
-  tipo: string;
   email: string;
 }
 

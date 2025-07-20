@@ -5,18 +5,17 @@ interface ICriarUsuario {
   nome: string;
   email: string;
   senha: string;
-  tipo: "ESTUDANTE" | "ORGANIZADOR";
 }
 
 async function criarUsuario(params: ICriarUsuario) {
-  const { nome, email, senha, tipo } = params;
+  const { nome, email, senha } = params;
 
   const query = `
-    INSERT INTO usuarios (nome, email, senha, tipo)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, nome, email, tipo
+    INSERT INTO usuarios (nome, email, senha)
+    VALUES ($1, $2, $3)
+    RETURNING id, nome, email
   `;
-  const values = [nome, email, senha, tipo];
+  const values = [nome, email, senha];
   const { rows } = await db.query(query, values);
   return rows[0];
 }
@@ -29,8 +28,7 @@ async function buscarPorEmailSenha(
     SELECT
       id,
       nome,
-      email,
-      tipo
+      email
     FROM usuarios
     WHERE email = $1 AND senha = $2 AND deletado_em IS NULL
   `;

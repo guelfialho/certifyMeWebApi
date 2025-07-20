@@ -19,7 +19,6 @@ async function loginUsuario(req: Request, res: Response) {
     const token = jwt.sign(
       {
         id: usuario.id,
-        tipo: usuario.tipo,
         nome: usuario.nome,
         email: usuario.email,
       },
@@ -34,7 +33,6 @@ async function loginUsuario(req: Request, res: Response) {
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
-        tipo: usuario.tipo,
       },
     });
   } else {
@@ -45,9 +43,9 @@ async function loginUsuario(req: Request, res: Response) {
 }
 
 async function cadastrarUsuario(req: Request, res: Response) {
-  const { nome, email, senha, tipo } = req.body;
+  const { nome, email, senha } = req.body;
 
-  if (!nome || !email || !senha || !tipo) {
+  if (!nome || !email || !senha) {
     return res
       .status(400)
       .json({ sucesso: false, mensagem: "Todos os campos são obrigatórios." });
@@ -57,7 +55,6 @@ async function cadastrarUsuario(req: Request, res: Response) {
     nome,
     email,
     senha,
-    tipo,
   });
 
   const response = {
