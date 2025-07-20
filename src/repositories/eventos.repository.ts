@@ -26,24 +26,6 @@ async function criarEvento({ titulo, descricao, data, organizador_id }: any) {
   };
 }
 
-async function listarEventos() {
-  const query = `
-    SELECT
-      e.id,
-      e.titulo,
-      e.descricao,
-      e.data,
-      u.nome AS organizador
-    FROM eventos e
-    JOIN usuarios u ON e.organizador_id = u.id
-    WHERE e.deletado_em IS NULL
-    ORDER BY e.data
-  `;
-
-  const { rows } = await db.query(query);
-  return rows;
-}
-
 async function listarEventosPorOrganizador(organizadorId: string) {
   const query = `
     SELECT
@@ -51,10 +33,21 @@ async function listarEventosPorOrganizador(organizadorId: string) {
       e.titulo,
       e.descricao,
       e.data,
-      u.nome AS organizador
+      e.local,
+      COALESCE(
+        json_agg(
+          json_build_object(
+            'nome', p.nome_participante,
+            'email', p.email_participante,
+            'cpf', p.cpf_participante
+          )
+        ) FILTER (WHERE p.id IS NOT NULL),
+        '[]'
+      ) AS participantes
     FROM eventos e
-    JOIN usuarios u ON e.organizador_id = u.id
+    LEFT JOIN presencas p ON p.evento_id = e.id AND p.deletado_em IS NULL
     WHERE e.deletado_em IS NULL AND e.organizador_id = $1
+    GROUP BY e.id
     ORDER BY e.data
   `;
 
@@ -62,40 +55,7 @@ async function listarEventosPorOrganizador(organizadorId: string) {
   return rows;
 }
 
-async function inscreverEstudante(eventoId: string, estudanteId: string) {
-  const client = await db.connect();
-
-  try {
-    await client.query("BEGIN");
-
-    // Insere na tabela de presenças
-    await client.query(
-      `INSERT INTO presencas (evento_id, estudante_id)
-       VALUES ($1, $2)
-       ON CONFLICT (evento_id, estudante_id) DO NOTHING`,
-      [eventoId, estudanteId]
-    );
-
-    // Insere na tabela de certificados
-    await client.query(
-      `INSERT INTO certificados (evento_id, estudante_id)
-       VALUES ($1, $2)
-       ON CONFLICT (evento_id, estudante_id) DO NOTHING`,
-      [eventoId, estudanteId]
-    );
-
-    await client.query("COMMIT");
-  } catch (error) {
-    await client.query("ROLLBACK");
-    throw error;
-  } finally {
-    client.release();
-  }
-}
-
 export default {
   criarEvento,
-  listarEventos,
-  inscreverEstudante,
   listarEventosPorOrganizador,
 };

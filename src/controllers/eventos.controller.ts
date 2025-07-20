@@ -46,11 +46,6 @@ async function criarEvento(req: Request, res: Response) {
   }
 }
 
-async function listarEventos(_: Request, res: Response) {
-  const eventos = await EventosRepository.listarEventos();
-  return res.json(eventos);
-}
-
 async function listarEventosPorOrganizador(req: Request, res: Response) {
   try {
     console.log("Entrei na listar eventos por organizador");
@@ -75,36 +70,7 @@ async function listarEventosPorOrganizador(req: Request, res: Response) {
   }
 }
 
-async function inscreverNoEvento(req: Request, res: Response) {
-  try {
-    const usuario = getLoggedUser(req);
-
-    const { eventoId } = req.body;
-
-    if (!eventoId) {
-      return res
-        .status(400)
-        .json({ sucesso: false, mensagem: "ID do evento é obrigatório." });
-    }
-
-    await EventosRepository.inscreverEstudante(eventoId, usuario.id);
-
-    return res.json({
-      sucesso: true,
-      mensagem: "Inscrição realizada com sucesso!",
-    });
-  } catch (e: any) {
-    console.error(e);
-    return res.status(500).json({
-      sucesso: false,
-      mensagem: e.message || "Erro ao se inscrever no evento.",
-    });
-  }
-}
-
 export default {
   criarEvento,
-  listarEventos,
-  inscreverNoEvento,
   listarEventosPorOrganizador,
 };
