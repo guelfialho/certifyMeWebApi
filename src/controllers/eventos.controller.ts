@@ -5,13 +5,12 @@ import { getLoggedUser } from "../utils/auth.utils";
 async function criarEvento(req: Request, res: Response) {
   try {
     const usuario = getLoggedUser(req);
+    const { titulo, descricao, data, local } = req.body;
 
-    const { titulo, descricao, data } = req.body;
-
-    if (!titulo || !data) {
+    if (!titulo || !data || !local) {
       return res.status(400).json({
         sucesso: false,
-        mensagem: "Campos obrigatórios ausentes: título e data.",
+        mensagem: "Campos obrigatórios ausentes: título, data e local.",
         evento: null,
       });
     }
@@ -20,7 +19,8 @@ async function criarEvento(req: Request, res: Response) {
       titulo,
       descricao,
       data,
-      organizador_id: usuario.id,
+      local,
+      organizadorId: usuario.id,
     });
 
     if (!evento) {
@@ -34,7 +34,7 @@ async function criarEvento(req: Request, res: Response) {
     return res.status(201).json({
       sucesso: true,
       mensagem: "Evento criado com sucesso",
-      evento: evento,
+      evento,
     });
   } catch (error: any) {
     console.error("Erro no criarEvento:", error);
@@ -59,6 +59,8 @@ async function listarEventosPorOrganizador(req: Request, res: Response) {
       sucesso: true,
       eventos,
     };
+
+    console.log(response);
 
     return res.json(response);
   } catch (e: any) {

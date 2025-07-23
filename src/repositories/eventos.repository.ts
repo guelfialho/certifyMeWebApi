@@ -1,29 +1,21 @@
 import { db } from "../db";
 
-async function criarEvento({ titulo, descricao, data, organizador_id }: any) {
-  const query = `
-    INSERT INTO eventos (titulo, descricao, data, organizador_id)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id, titulo, descricao, data, organizador_id
+export async function criarEvento({
+  titulo,
+  descricao,
+  data,
+  local,
+  organizadorId,
+}: CriarEventoInput): Promise<EventoCriado> {
+  const insertQuery = `
+    INSERT INTO eventos (titulo, descricao, data, local, organizador_id)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING id, titulo, descricao, data, local
   `;
-  const values = [titulo, descricao, data, organizador_id];
-  const { rows } = await db.query(query, values);
+  const insertValues = [titulo, descricao ?? null, data, local, organizadorId];
+  const { rows } = await db.query(insertQuery, insertValues);
 
-  const evento = rows[0];
-
-  const organizadorQuery = `SELECT nome FROM usuarios WHERE id = $1`;
-
-  const { rows: orgRows } = await db.query(organizadorQuery, [
-    evento.organizador_id,
-  ]);
-
-  return {
-    id: evento.id,
-    titulo: evento.titulo,
-    descricao: evento.descricao,
-    data: evento.data,
-    organizador: orgRows[0]?.nome || "Organizador desconhecido",
-  };
+  return rows[0];
 }
 
 async function listarEventosPorOrganizador(organizadorId: string) {
