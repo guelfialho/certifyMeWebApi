@@ -1,18 +1,52 @@
-version: "3.1"
-
 services:
   db:
+    container_name: certifyMeWebdb
     image: postgres:14.2-alpine
-    container_name: certifyMeWeb
     restart: always
     environment:
       POSTGRES_DB: certifymeweb
       POSTGRES_USER: miguel
       POSTGRES_PASSWORD: cincopassaigualadez
     ports:
-      - "5438:5432"
+    #  - "5438:5432"
+      - 5432/tcp
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d/
+
+  api:
+    container_name: certifyMeWebApi
+    build:
+      dockerfile: ./dockerfile
+      tags:
+        - localimages/certifymewebapi:latest
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: certifymeweb
+      DB_USER: miguel
+      DB_PASSWORD: cincopassaigualadez
+      JWT_SECRET: chave_super_secreta_do_certifyme_web
+    ports:
+      - 127.0.0.1:3000:3000/tcp
+      - ::1:3000:3000/tcp
+    depends_on:
+      - db
+
+  frontend:
+    container_name: certifyMeWeb
+    build:
+      context: ../certifyMeWeb/
+      dockerfile: dockerfile
+      tags:
+        - localimages/certifymeweb:latest
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:5173:5173/tcp
+      - ::1:5173:5173/tcp
+    depends_on:
+      - api
 
 volumes:
   db_data:
