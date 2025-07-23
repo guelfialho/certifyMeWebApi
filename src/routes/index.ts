@@ -16,10 +16,6 @@ router.get(
 );
 router.post("/eventos", autenticarToken, EventosController.criarEvento);
 
-router.post(
-  "/presencas",
-  autenticarToken,
-  PresencasController.registrarPresenca
-);
+router.post("/presencas", PresencasController.registrarPresenca);
 
 export default router;
